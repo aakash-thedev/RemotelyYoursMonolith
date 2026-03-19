@@ -1,0 +1,6 @@
+---
+:concurrency: 5
+:queues:
+  - [default, 3]
+  - [scoring, 2]
+  - [mailers, 1]

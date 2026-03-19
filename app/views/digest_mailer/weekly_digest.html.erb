@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #faf8f5; margin: 0; padding: 0; color: #3d2c1e; }
+    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+    .header { text-align: center; margin-bottom: 32px; }
+    .header h1 { font-size: 24px; color: #3d2c1e; margin: 0; }
+    .header p { color: #8b7355; font-size: 14px; margin-top: 8px; }
+    .job-card { background: #fff; border: 1px solid #e8e0d4; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .job-title { font-size: 16px; font-weight: 600; color: #3d2c1e; margin: 0; }
+    .job-company { font-size: 14px; color: #8b7355; margin-top: 4px; }
+    .fit-badge { display: inline-block; background: #c75b39; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; margin-top: 8px; }
+    .job-meta { font-size: 13px; color: #8b7355; margin-top: 8px; }
+    .cta { display: inline-block; background: #c75b39; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 24px; font-weight: 600; font-size: 14px; margin-top: 24px; }
+    .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #8b7355; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Your Weekly Job Matches</h1>
+      <p>Hi <%= @user.full_name.split(' ').first %>, here are your top matches this week.</p>
+    </div>
+
+    <% @matches.each do |match| %>
+      <div class="job-card">
+        <p class="job-title"><%= match.job.title %></p>
+        <p class="job-company"><%= match.job.company_name %> &middot; <%= match.job.location %></p>
+        <span class="fit-badge"><%= match.fit_score %>% fit</span>
+        <% if match.job.salary_display.present? %>
+          <p class="job-meta"><%= match.job.salary_display %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div style="text-align: center;">
+      <a href="<%= @frontend_url %>/dashboard" class="cta">View all matches &rarr;</a>
+    </div>
+
+    <div class="footer">
+      <p>RemotelyYours &mdash; AI-powered remote job matching</p>
+      <p>You're receiving this because you have an active profile on RemotelyYours.</p>
+    </div>
+  </div>
+</body>
+</html>
