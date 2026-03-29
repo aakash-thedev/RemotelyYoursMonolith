@@ -57,8 +57,8 @@ module Api
         params.permit(
           :headline, :bio, :location, :years_of_experience,
           :resume_url, :linkedin_url, :github_url, :portfolio_url,
-          :desired_role, :desired_salary_min, :desired_salary_max,
-          :remote_preference, :talent_brief, :timezone,
+          :desired_role, :desired_salary_min, :desired_salary_max, :salary_currency,
+          :remote_preference, :talent_brief, :timezone, :job_region,
           :available_from, :onboarding_completed, :photo_url,
           skills: [], preferred_roles: []
         )
@@ -77,6 +77,7 @@ module Api
           desired_role: profile.desired_role,
           desired_salary_min: profile.desired_salary_min,
           desired_salary_max: profile.desired_salary_max,
+          salary_currency: profile.salary_currency,
           remote_preference: profile.remote_preference,
           timezone: profile.timezone,
           available_from: profile.available_from,
@@ -86,6 +87,7 @@ module Api
           portfolio_url: profile.portfolio_url,
           photo_url: profile.photo_url,
           talent_brief: profile.talent_brief,
+          job_region: profile.job_region,
           onboarding_completed: profile.onboarding_completed,
           updated_at: profile.updated_at
         }

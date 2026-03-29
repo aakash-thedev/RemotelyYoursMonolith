@@ -10,6 +10,8 @@ class JobMatch < ApplicationRecord
   scope :high_scoring, -> { where("fit_score >= ?", 70) }
   scope :scored, -> { where.not(fit_score: nil) }
   scope :unscored, -> { where(fit_score: nil) }
+  scope :saved, -> { where(is_saved: true) }
+  scope :applied, -> { where(is_applied: true) }
 
   # score_breakdown is stored as JSON:
   # { skills: 85, experience: 70, role_fit: 90, location: 80 }

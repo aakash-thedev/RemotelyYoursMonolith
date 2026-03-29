@@ -5,12 +5,12 @@ class Subscription < ApplicationRecord
 
   validates :user_id, presence: true, uniqueness: true
 
-  enum plan: { free: "free", pro: "pro", enterprise: "enterprise" }
+  enum plan: { free: "free", pro: "pro", pro_plus: "pro_plus" }
   enum status: { inactive: "inactive", active: "active", cancelled: "cancelled", expired: "expired" }
 
   PLANS = {
-    pro: { amount: 49900, currency: "INR", label: "Pro — Rs 499/mo" },
-    enterprise: { amount: 149900, currency: "INR", label: "Enterprise — Rs 1499/mo" }
+    pro: { amount: 89_900, currency: "INR", label: "Pro", price_display: "₹899/year", duration: 1.year },
+    pro_plus: { amount: 249_900, currency: "INR", label: "Pro+", price_display: "₹2,499/year", duration: 1.year }
   }.freeze
 
   scope :active_subscriptions, -> { where(status: :active).where("expires_at > ?", Time.current) }

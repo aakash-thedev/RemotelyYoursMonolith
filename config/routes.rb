@@ -17,8 +17,13 @@ Rails.application.routes.draw do
       # jobs
       resources :jobs, only: %i[index show] do
         get :fit_score, on: :member, to: "fit_scores#show"
+        post :save, on: :member, to: "jobs#save_job"
+        delete :save, on: :member, to: "jobs#unsave_job"
+        post :apply, on: :member, to: "jobs#mark_applied"
         collection do
           get "my-matches", to: "jobs#my_matches"
+          get "saved", to: "jobs#saved"
+          get "preview", to: "jobs#preview"
         end
       end
 
@@ -27,10 +32,16 @@ Rails.application.routes.draw do
 
       # subscription
       resource :subscription, only: %i[show] do
+        get :plans, on: :collection
         post :create_order, on: :member
         post :verify_payment, on: :member
         delete :cancel, on: :member
       end
+
+      # password management
+      post "auth/change_password", to: "auth#change_password"
+      post "auth/forgot_password", to: "auth#forgot_password"
+      post "auth/reset_password", to: "auth#reset_password"
     end
   end
 end

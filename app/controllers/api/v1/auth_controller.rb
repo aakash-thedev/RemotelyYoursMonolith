@@ -3,7 +3,7 @@
 module Api
   module V1
     class AuthController < ApplicationController
-      skip_before_action :authenticate_user!, only: %i[signup login google]
+      skip_before_action :authenticate_user!, only: %i[signup login google forgot_password reset_password]
 
       # POST /api/v1/auth/signup
       def signup
@@ -15,6 +15,7 @@ module Api
             user.create_subscription!(plan: :free, status: :active, started_at: Time.current)
 
             token = encode_token(user)
+            set_auth_cookie(token)
             render json: {
               message: "Account created successfully",
               token: token,
@@ -32,6 +33,7 @@ module Api
 
         if user&.authenticate(login_params[:password])
           token = encode_token(user)
+          set_auth_cookie(token)
           render json: {
             message: "Logged in successfully",
             token: token,
@@ -75,6 +77,7 @@ module Api
         end
 
         token = encode_token(user)
+        set_auth_cookie(token)
         render json: {
           message: "Authenticated with Google",
           token: token,
@@ -84,7 +87,76 @@ module Api
 
       # DELETE /api/v1/auth/logout
       def logout
+        clear_auth_cookie
         render json: { message: "Logged out successfully" }, status: :ok
+      end
+
+      # POST /api/v1/auth/change_password
+      def change_password
+        unless current_user.authenticate(params[:current_password])
+          render json: { error: "Current password is incorrect" }, status: :unprocessable_entity
+          return
+        end
+
+        if current_user.update(password: params[:new_password])
+          render json: { message: "Password changed successfully" }, status: :ok
+        else
+          render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # POST /api/v1/auth/forgot_password
+      def forgot_password
+        email = params[:email]&.downcase&.strip
+        unless email.present?
+          render json: { error: "Email is required" }, status: :bad_request
+          return
+        end
+
+        user = User.find_by(email: email)
+
+        # Always return success to prevent email enumeration
+        if user
+          token = SecureRandom.urlsafe_base64(32)
+          user.update!(
+            reset_password_token: Digest::SHA256.hexdigest(token),
+            reset_password_sent_at: Time.current
+          )
+          PasswordResetMailer.reset_email(user: user, token: token).deliver_later
+        end
+
+        render json: { message: "If that email exists, we've sent password reset instructions." }, status: :ok
+      end
+
+      # POST /api/v1/auth/reset_password
+      def reset_password
+        token = params[:token]
+        password = params[:password]
+
+        unless token.present? && password.present?
+          render json: { error: "Token and new password are required" }, status: :bad_request
+          return
+        end
+
+        hashed_token = Digest::SHA256.hexdigest(token)
+        user = User.find_by(reset_password_token: hashed_token)
+
+        unless user
+          render json: { error: "Invalid or expired reset token" }, status: :unprocessable_entity
+          return
+        end
+
+        # Token expires after 2 hours
+        if user.reset_password_sent_at.blank? || user.reset_password_sent_at < 2.hours.ago
+          render json: { error: "Reset token has expired. Please request a new one." }, status: :unprocessable_entity
+          return
+        end
+
+        if user.update(password: password, reset_password_token: nil, reset_password_sent_at: nil)
+          render json: { message: "Password reset successfully. You can now log in." }, status: :ok
+        else
+          render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+        end
       end
 
       private

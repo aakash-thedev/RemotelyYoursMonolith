@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_01_000005) do
+ActiveRecord::Schema[7.0].define(version: 2026_03_29_132127) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,9 +28,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_01_000005) do
     t.boolean "is_applied", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_saved", default: false, null: false
     t.index ["job_id"], name: "index_job_matches_on_job_id"
     t.index ["score_breakdown"], name: "index_job_matches_on_score_breakdown", using: :gin
     t.index ["user_id", "fit_score"], name: "index_job_matches_on_user_id_and_fit_score"
+    t.index ["user_id", "is_saved"], name: "index_job_matches_on_user_id_and_is_saved"
     t.index ["user_id", "job_id"], name: "index_job_matches_on_user_id_and_job_id", unique: true
     t.index ["user_id"], name: "index_job_matches_on_user_id"
   end
@@ -87,6 +89,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_01_000005) do
     t.boolean "onboarding_completed", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "job_region", default: "anywhere", null: false
+    t.string "salary_currency", default: "INR"
     t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
   end
 
@@ -116,8 +120,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_01_000005) do
     t.datetime "email_verified_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true, where: "(provider IS NOT NULL)"
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   add_foreign_key "job_matches", "jobs"

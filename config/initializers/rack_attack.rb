@@ -26,6 +26,27 @@ class Rack::Attack
     end
   end
 
+  ### Throttle password reset requests ###
+  throttle("auth/forgot_password", limit: 3, period: 15.minutes) do |req|
+    if req.path.start_with?("/api/v1/auth/forgot_password") && req.post?
+      req.ip
+    end
+  end
+
+  ### Throttle password reset attempts by token ###
+  throttle("auth/reset_password", limit: 5, period: 15.minutes) do |req|
+    if req.path.start_with?("/api/v1/auth/reset_password") && req.post?
+      req.ip
+    end
+  end
+
+  ### Throttle payment order creation ###
+  throttle("subscription/create_order", limit: 5, period: 5.minutes) do |req|
+    if req.path.include?("create_order") && req.post?
+      req.ip
+    end
+  end
+
   ### General API rate limit per IP ###
   throttle("api/ip", limit: 300, period: 5.minutes) do |req|
     req.ip if req.path.start_with?("/api/")

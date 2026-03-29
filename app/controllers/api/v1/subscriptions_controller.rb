@@ -3,6 +3,23 @@
 module Api
   module V1
     class SubscriptionsController < ApplicationController
+      skip_before_action :authenticate_user!, only: [:plans]
+
+      # GET /api/v1/subscription/plans
+      def plans
+        plan_list = Subscription::PLANS.map do |key, config|
+          {
+            key: key.to_s,
+            label: config[:label],
+            amount: config[:amount],
+            price_display: config[:price_display],
+            currency: config[:currency]
+          }
+        end
+
+        render json: { plans: plan_list }, status: :ok
+      end
+
       # GET /api/v1/subscription
       def show
         subscription = current_user.subscription
@@ -104,14 +121,18 @@ module Api
         end
 
         # Activate subscription
+        plan_key = (params[:plan] || "pro").to_sym
+        plan_config = Subscription::PLANS[plan_key]
+        duration = plan_config ? plan_config[:duration] : 1.year
+
         subscription = current_user.subscription || current_user.build_subscription
         subscription.assign_attributes(
-          plan: params[:plan] || "pro",
+          plan: plan_key.to_s,
           status: "active",
           razorpay_payment_id: payment_id,
           order_id: order_id,
           started_at: Time.current,
-          expires_at: 1.month.from_now
+          expires_at: duration.from_now
         )
 
         if subscription.save

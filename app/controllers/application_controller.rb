@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  include ActionController::Cookies
+
   before_action :authenticate_user!
 
   # Global exception handlers for production safety
@@ -21,6 +23,7 @@ class ApplicationController < ActionController::API
   def authenticate_user!
     header = request.headers["Authorization"]
     token = header&.split(" ")&.last
+    token = cookies[:ry_token] if token.blank?
 
     if token.blank?
       render json: { error: "Authorization token missing" }, status: :unauthorized
@@ -52,5 +55,20 @@ class ApplicationController < ActionController::API
       exp: 30.days.from_now.to_i
     }
     JWT.encode(payload, ENV.fetch("JWT_SECRET"), "HS256")
+  end
+
+  def set_auth_cookie(token)
+    cookies[:ry_token] = {
+      value: token,
+      httponly: true,
+      secure: Rails.env.production?,
+      same_site: :lax,
+      expires: 30.days.from_now,
+      path: "/"
+    }
+  end
+
+  def clear_auth_cookie
+    cookies.delete(:ry_token, path: "/")
   end
 end

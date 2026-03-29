@@ -73,8 +73,9 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  # Use Sidekiq for Active Job in production
-  config.active_job.queue_adapter = :sidekiq
+  # Use :async for free-tier deployment (no separate Sidekiq worker needed).
+  # Switch to :sidekiq when you add a paid background worker.
+  config.active_job.queue_adapter = :async
 
   # ActionMailer — SMTP via SendGrid/Postmark (configure via ENV)
   config.action_mailer.delivery_method = :smtp

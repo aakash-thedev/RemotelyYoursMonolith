@@ -11,9 +11,10 @@ class JobIngestionWorker
     # Fetch from all sources
     remotive_jobs = JobIngestion::RemotiveFetcher.new.call
     adzuna_jobs = JobIngestion::AdzunaFetcher.new.call
+    himalayas_jobs = JobIngestion::HimalayasFetcher.new.call
 
-    all_raw_jobs = remotive_jobs + adzuna_jobs
-    Rails.logger.info("[JobIngestionWorker] Fetched #{all_raw_jobs.size} raw jobs (Remotive: #{remotive_jobs.size}, Adzuna: #{adzuna_jobs.size})")
+    all_raw_jobs = remotive_jobs + adzuna_jobs + himalayas_jobs
+    Rails.logger.info("[JobIngestionWorker] Fetched #{all_raw_jobs.size} raw jobs (Remotive: #{remotive_jobs.size}, Adzuna: #{adzuna_jobs.size}, Himalayas: #{himalayas_jobs.size})")
 
     # Normalize and persist
     persisted_jobs = JobIngestion::JobNormalizer.new(all_raw_jobs).call

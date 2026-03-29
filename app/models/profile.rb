@@ -4,6 +4,7 @@ class Profile < ApplicationRecord
   belongs_to :user
 
   validates :user_id, presence: true, uniqueness: true
+  validates :job_region, inclusion: { in: %w[india uae us eu anywhere] }, allow_nil: true
 
   # skills and preferred_locations stored as JSON arrays
   # (use `serialize` if not using Postgres jsonb columns)

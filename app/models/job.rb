@@ -10,6 +10,21 @@ class Job < ApplicationRecord
   scope :recent, -> { where("posted_at >= ?", 14.days.ago) }
   scope :by_category, ->(cat) { where(category: cat) if cat.present? }
 
+  scope :by_region, ->(region) {
+    case region&.to_s
+    when "india"
+      where("location ILIKE ANY(ARRAY[?, ?, ?, ?])", "%india%", "%apac%", "%global%", "%anywhere%")
+    when "us"
+      where("location ILIKE ANY(ARRAY[?, ?, ?, ?, ?])", "%us%", "%united states%", "%americas%", "%global%", "%anywhere%")
+    when "eu"
+      where("location ILIKE ANY(ARRAY[?, ?, ?, ?])", "%europe%", "%emea%", "%global%", "%anywhere%")
+    when "uae"
+      where("location ILIKE ANY(ARRAY[?, ?, ?, ?])", "%uae%", "%middle east%", "%global%", "%anywhere%")
+    else
+      all # "anywhere" or nil — no filter
+    end
+  }
+
   def expired?
     expires_at.present? && expires_at < Time.current
   end

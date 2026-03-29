@@ -42,6 +42,7 @@ gem "faraday-retry"
 
 # Background jobs
 gem "sidekiq"
+gem "sidekiq-cron"
 
 # OpenAI
 gem "ruby-openai"
